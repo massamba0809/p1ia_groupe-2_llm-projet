@@ -1,0 +1,16 @@
+# Chaque membre ajoute ses dépendances dans SA section (limite les conflits Git)
+
+# --- Tech lead (génération) ---
+python-dotenv
+groq
+
+# --- Ingestion (Abdou Karim) ---
+pypdf
+
+# --- Retrieval (Haroona) ---
+sentence-transformers
+chromadb
+
+# --- Évaluation (Sine Ndoye) ---
+
+# --- Bonus (Mamadou) ---
