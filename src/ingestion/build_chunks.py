@@ -4,7 +4,8 @@ Usage : python -m src.ingestion.build_chunks
 Entrée : data/code_travail_senegal.pdf
 Sortie : data/code_travail_chunks.json  (liste de {id, text, source})
 
-Étapes : extract (PDF -> lignes) -> parser (lignes -> articles) -> chunker (articles -> chunks).
+Étapes : extract (PDF -> lignes) -> clean (nettoyage) -> parser (lignes -> articles)
+-> chunker (articles -> chunks).
 
 Choix de découpage (à justifier dans le rapport) :
 - un article de loi = une unité de sens, donc un chunk par article ;
@@ -14,13 +15,14 @@ Choix de découpage (à justifier dans le rapport) :
 import json
 
 from src.ingestion.chunker import to_chunks
+from src.ingestion.clean import clean_lines
 from src.ingestion.config import MAX_CHARS, OUT_PATH
 from src.ingestion.extract import read_lines
 from src.ingestion.parser import parse
 
 
 def build(max_chars: int = MAX_CHARS) -> list[dict]:
-    return to_chunks(parse(read_lines()), max_chars)
+    return to_chunks(parse(clean_lines(read_lines())), max_chars)
 
 
 def main() -> None:

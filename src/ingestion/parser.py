@@ -5,6 +5,8 @@ Chaque article est un dict : {"num": "L.49", "modif": "Loi 2015-04 ...", "ctx": 
 """
 import re
 
+from src.ingestion.clean import join_lines
+
 # tolère une mention de modification après le numéro : "Article L.49. (Loi 2015-04 du 12 Février 2015)"
 # et l'absence de point après "L" : "Article L 76 bis (Loi 2015 -04 du 12 Février 2015)"
 RE_ARTICLE = re.compile(r"^Article\s+(L\.?\s?\d+(?:\s?(?:bis|ter))?)\.?\s*(?:\((.*)\))?\s*$", re.I)
@@ -73,6 +75,6 @@ def parse(lines: list[str]) -> list[dict]:
             if current["paras"][-1] == "":
                 current["paras"][-1] = ln
             else:
-                current["paras"][-1] += " " + ln
+                current["paras"][-1] = join_lines(current["paras"][-1], ln)
     flush()
     return articles

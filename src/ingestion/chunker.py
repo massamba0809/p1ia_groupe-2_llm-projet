@@ -6,6 +6,7 @@
 """
 import re
 
+from src.ingestion.clean import clean_paragraph
 from src.ingestion.config import LAW, MAX_CHARS
 
 RE_SENTENCE = re.compile(r"(?<=[.;:!?»])\s+(?=[A-ZÀ-Ý«\-])")
@@ -17,7 +18,7 @@ def to_chunks(articles: list[dict], max_chars: int = MAX_CHARS) -> list[dict]:
         paras = []
         for p in art["paras"]:
             if p:  # coupe aussi aux phrases/puces, car l'extraction fusionne parfois les paragraphes
-                paras.extend(RE_SENTENCE.split(p))
+                paras.extend(RE_SENTENCE.split(clean_paragraph(p)))
         header = " > ".join(v for v in art["ctx"].values() if v)
         title = f"Article {art['num']}"
         if art.get("modif"):
