@@ -7,11 +7,9 @@ Les chunks sont générés une fois par : python -m src.ingestion.build_chunks
 (le fichier data/code_travail_chunks.json est déjà fourni dans le dépôt).
 """
 import json
-from pathlib import Path
 
 from src.common.types import Chunk
-
-CHUNKS_PATH = Path(__file__).resolve().parents[2] / "data" / "code_travail_chunks.json"
+from src.ingestion.config import OUT_PATH as CHUNKS_PATH
 
 
 def ingest() -> list[Chunk]:
