@@ -3,7 +3,7 @@ import json
 from datetime import date
 
 import config
-from ingest import normalize_label
+from ingestion.ingest import normalize_label
 
 _chunks = None
 
