@@ -9,7 +9,8 @@ import re
 from src.ingestion.clean import clean_paragraph
 from src.ingestion.config import LAW, MAX_CHARS
 
-RE_SENTENCE = re.compile(r"(?<=[.;:!?»])\s+(?=[A-ZÀ-Ý«\-])")
+# fin de phrase suivie d'une majuscule, ou puce d'énumération "a) ... ; b) ..." (cf. article L.279)
+RE_SENTENCE = re.compile(r"(?<=[.;:!?»])\s+(?=[A-ZÀ-Ý«\-]|[a-z]\)\s)")
 
 
 def to_chunks(articles: list[dict], max_chars: int = MAX_CHARS) -> list[dict]:
