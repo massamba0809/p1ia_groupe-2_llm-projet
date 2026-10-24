@@ -19,6 +19,9 @@ def to_chunks(articles: list[dict], max_chars: int = MAX_CHARS) -> list[dict]:
             if p:  # coupe aussi aux phrases/puces, car l'extraction fusionne parfois les paragraphes
                 paras.extend(RE_SENTENCE.split(p))
         header = " > ".join(v for v in art["ctx"].values() if v)
+        title = f"Article {art['num']}"
+        if art.get("modif"):
+            title += f" (rédaction issue de la {art['modif']})"
         source = f"{LAW}, Article {art['num']}"
         # regrouper les paragraphes sans dépasser max_chars
         parts, buf = [], ""
@@ -32,6 +35,6 @@ def to_chunks(articles: list[dict], max_chars: int = MAX_CHARS) -> list[dict]:
             parts.append(buf)
         for i, body in enumerate(parts, 1):
             cid = f"{art['num']}" if len(parts) == 1 else f"{art['num']}-{i}"
-            text = f"[{header}]\nArticle {art['num']}\n{body}"
+            text = f"[{header}]\n{title}\n{body}"
             chunks.append({"id": cid, "text": text, "source": source})
     return chunks
