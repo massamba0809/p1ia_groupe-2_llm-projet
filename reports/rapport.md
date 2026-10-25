@@ -106,6 +106,8 @@ Pour chaque échec, nous avons lu le texte des articles qui ont pris la place du
 
 **Réponses sans citation d'article :** q15, q20
 
+**Lien entre retrieval et génération :** la seule erreur de génération (q15) vient directement d'un échec du retrieval : L.126 n'était pas parmi les 4 passages, et le système a répondu « Je ne trouve pas la réponse » au lieu d'inventer. À l'inverse, les autres questions dont le bon article n'était pas en 1re position (q02, q12, q16, q17, q18, q21) ont reçu une réponse jugée correcte, car l'article figurait parmi les 4 passages. Une erreur de retrieval se transforme donc en refus, et non en réponse inventée.
+
 Ces constats reposent sur les commentaires du juge LLM et n'ont pas été relus systématiquement par un humain.
 
 ## 4. Limites de l'évaluation
