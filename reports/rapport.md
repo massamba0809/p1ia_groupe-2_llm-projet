@@ -2,7 +2,7 @@
 
 > Module évaluation : Sine Ndoye. Les chiffres viennent de `eval/results/resume.md` et `eval/results/resultats.csv`,
 > générés par `python -m eval.evaluate` (k = 4, modèle d'embedding `intfloat/multilingual-e5-small`).
-> Les passages entre `[À COMPLÉTER]` dépendent de la génération (LLM), qui n'était pas branchée lors du premier lancement.
+> Mesures de retrieval et de génération exécutées sur le système complet.
 
 ## 1. Méthode
 
@@ -71,10 +71,19 @@ Réduire k à 3 ferait perdre q02 et q17.
 
 ### 2.2 Génération : fidélité et exactitude
 
-[À COMPLÉTER : coller la ligne « Global » et les lignes par type de `eval/results/resume.md` après avoir relancé
-`python -m eval.evaluate` avec le LLM branché. LLM de génération utilisé : [À COMPLÉTER].]
+Mesuré sur les 21 questions avec le système complet (modèle de génération : `openai/gpt-oss-120b`, juge : `openai/gpt-oss-120b`). Notes de fidélité et d'exactitude : 0, 0,5 ou 1 (moyennes).
 
-## 3. Erreurs constatées (retrieval)
+| Groupe | n | hit@1 | hit@4 | MRR | Fidélité | Exactitude | Citation | Latence (s) |
+|---|---|---|---|---|---|---|---|---|
+| **Global** | 21 | 58% | 89% | 0.69 | 1.00 | 0.95 | 89% | 6.32 |
+| factuelle | 15 | 67% | 93% | 0.76 | 1.00 | 0.93 | 93% | 5.61 |
+| hors_sujet | 1 | n/a | n/a | n/a | 1.00 | 1.00 | n/a | 9.57 |
+| injection | 1 | n/a | n/a | n/a | 1.00 | 1.00 | n/a | 6.24 |
+| reformulee | 2 | 50% | 100% | 0.67 | 1.00 | 1.00 | 100% | 9.07 |
+| hors_corpus | 1 | 0% | 0% | 0.00 | 1.00 | 1.00 | 0% | 7.38 |
+| donnees_perso | 1 | 0% | 100% | 0.50 | 1.00 | 1.00 | 100% | 7.22 |
+
+## 3. Erreurs constatées (retrieval et génération)
 
 Pour chaque échec, nous avons lu le texte des articles qui ont pris la place du bon (colonne `passages_retrouves` de `resultats.csv`).
 
@@ -91,7 +100,13 @@ Pour chaque échec, nous avons lu le texte des articles qui ont pris la place du
 
 **Constat général :** sur les 7 questions où le bon article n'est pas en 1re position (hors q20), 4 viennent d'un **écart de vocabulaire** entre la question (« maternité », « réclamer », « femme », « riz ») et le texte de loi (« accouchement », « prescription », « sexe », « en nature ») : q02, q15, q17, q18. Deux viennent d'**articles voisins** quasi identiques : q12 et q16. La dernière, q21, concerne les données personnelles.
 
-[À COMPLÉTER après relance avec le LLM : erreurs de génération (réponses infidèles, refus à tort, injection mal gérée, données personnelles répétées), à partir de la colonne `commentaire_juge`.]
+**Erreurs de génération relevées par le juge (note inférieure à 1) :**
+
+- **q15** (factuelle) : fidélité 1, exactitude 0. Juge : La réponse indique qu'aucune information n'est trouvée, ce qui est conforme aux passages, mais elle ne fournit pas la prescription de cinq ans indiquée dans la réponse de référence.
+
+**Réponses sans citation d'article :** q15, q20
+
+Ces constats reposent sur les commentaires du juge LLM et n'ont pas été relus systématiquement par un humain.
 
 ## 4. Limites de l'évaluation
 
@@ -99,7 +114,8 @@ Pour chaque échec, nous avons lu le texte des articles qui ont pris la place du
 - **Un seul article attendu par question** : c'est strict. En q12 et q16, les articles qui passent devant sont aussi pertinents ; en q15, L.127 traite du bon sujet. Le retrieval est parfois sous-estimé.
 - **q20 (SMIG) mesure deux choses à la fois.** Nous avons attendu L.109 (« les décrets fixent les salaires minima »), mais le bon comportement du système est de dire que le Code ne donne pas de montant. Nous présentons donc les scores avec et sans q20.
 - **q21 n'isole pas l'effet des données personnelles** : sa formulation diffère de q03. Un test propre utiliserait exactement la même question, avec et sans nom et téléphone.
-- **Le juge est lui-même un LLM** : il peut se tromper ou être indulgent. [À CONFIRMER : relecture manuelle de ses commentaires sur les échecs.]
+- **Le juge est lui-même un LLM** : il peut se tromper ou être indulgent. Ses notes n'ont pas été vérifiées systématiquement par un humain.
+- **Le même modèle génère et note les réponses** (`openai/gpt-oss-120b`) : il peut se montrer indulgent envers ses propres réponses.
 - **Questions écrites par l'équipe** : elles ressemblent sans doute plus au texte de loi que celles de vrais utilisateurs. Seules 2 questions sont en langage courant.
 - **Corpus de 1997** : une réponse fidèle au corpus peut être dépassée en droit (nouveau code en cours d'adoption).
 
