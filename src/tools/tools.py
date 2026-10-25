@@ -1,9 +1,8 @@
 """Fonctions appelables par le modèle (function calling)."""
-import json
+import re
 from datetime import date
 
-import config
-from ingestion.ingest import normalize_label
+from src.ingestion.ingest import ingest
 
 _chunks = None
 
@@ -11,17 +10,23 @@ _chunks = None
 def _load():
     global _chunks
     if _chunks is None:
-        _chunks = json.loads((config.INDEX_DIR / "code_travail_chunks.json").read_text(encoding="utf-8"))
+        _chunks = ingest()    
     return _chunks
 
+def normaliser_numero(numero: str) -> str:
+    """'42', 'L42', 'l. 42', 'Article L.42' -> 'L.42'."""
+    chiffres = re.search(r"\d+", numero)
+    return f"L.{chiffres.group(0)}" if chiffres else numero.strip()
 
 def recherche_article(numero: str) -> str:
-    """Recherche structurée : renvoie le texte exact d'un article (ex. 'L.42')."""
-    target = normalize_label(numero)
-    parts = [c for c in _load() if c["article"] == target]
-    if not parts:
+    """Recherche structurée : renvoie le texte exact d'un article (ex. 'L.42').
+    Un article long est découpé en morceaux L.42-1, L.42-2... : on les recolle dans l'ordre."""
+    cible = normaliser_numero(numero)
+    morceaux = [c for c in _load() if c.id == cible or c.id.startswith(cible + "-")]
+    if not morceaux:
         return f"Article {numero} introuvable dans le corpus."
-    return "\n".join(c["text"] for c in sorted(parts, key=lambda c: c["part"]))
+    morceaux.sort(key=lambda c: int(c.id.split("-")[1]) if "-" in c.id else 0)
+    return "\n".join(c.text for c in morceaux)
 
 
 def calcul_anciennete(date_debut: str, date_fin: str) -> str:
