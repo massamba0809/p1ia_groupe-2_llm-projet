@@ -5,7 +5,7 @@ python-dotenv
 groq
 
 # --- Ingestion (Abdou Karim) ---
-pypdf
+pypdf>=6.0,<7  # l'extraction du texte varie selon la version (testé avec 6.17)
 
 # --- Retrieval (Haroona) ---
 sentence-transformers

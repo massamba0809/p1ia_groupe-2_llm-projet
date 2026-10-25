@@ -43,3 +43,21 @@ def list_sources(chunks: list[Chunk] | None = None) -> list[str]:
 def document_reference() -> str:
     d = SOURCE_DOC
     return f"{d['titre']}, {d['editeur']}. {d['url']} (copie : {d['url_miroir']})"
+
+
+if __name__ == "__main__":
+    # démo : python -m src.ingestion.ingest L.135   |   python -m src.ingestion.ingest --sources
+    import sys
+
+    arg = sys.argv[1] if len(sys.argv) > 1 else ""
+    if arg == "--sources":
+        print(document_reference(), *list_sources(), sep="\n")
+    elif arg:
+        found = get_article(arg)
+        if not found:
+            print(f"Article {arg} introuvable.")
+        for c in found:
+            print(f"--- {c.id} ({c.source})\n{c.text}\n")
+    else:
+        chunks = ingest()
+        print(f"{len(chunks)} chunks, {len(list_sources(chunks))} articles. Source : {document_reference()}")
