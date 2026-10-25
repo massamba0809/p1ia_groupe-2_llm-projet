@@ -36,7 +36,7 @@ MODELS = {
         "passage_prefix": "passage: ",
     },
 }
-DEFAULT_MODEL = "minilm"
+DEFAULT_MODEL = "e5"  # meilleur des deux sur nos questions (voir RESULTATS.md)
 
 _models = {}       # modèles déjà chargés en mémoire
 _collections = {}  # collections ChromaDB déjà ouvertes
