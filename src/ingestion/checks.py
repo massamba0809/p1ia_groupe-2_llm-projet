@@ -88,5 +88,7 @@ CHECKS = {
 }
 
 
-def run_checks(chunks: list[dict]) -> dict[str, list[str]]:
-    return {name: check(chunks) for name, check in CHECKS.items()}
+def run_checks(chunks: list[dict], max_chars: int = MAX_CHARS) -> dict[str, list[str]]:
+    results = {name: check(chunks) for name, check in CHECKS.items()}
+    results["tailles"] = check_sizes(chunks, max_chars=max_chars)
+    return results
