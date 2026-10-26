@@ -7,13 +7,57 @@ Les chunks sont générés une fois par : python -m src.ingestion.build_chunks
 (le fichier data/code_travail_chunks.json est déjà fourni dans le dépôt).
 """
 import json
-from pathlib import Path
 
 from src.common.types import Chunk
-
-CHUNKS_PATH = Path(__file__).resolve().parents[2] / "data" / "code_travail_chunks.json"
+from src.ingestion.checks import article_of
+from src.ingestion.config import OUT_PATH as CHUNKS_PATH, SOURCE_DOC
 
 
 def ingest() -> list[Chunk]:
+    if not CHUNKS_PATH.exists():
+        raise FileNotFoundError(
+            f"{CHUNKS_PATH} introuvable : lancer d'abord `python -m src.ingestion.build_chunks`."
+        )
     with open(CHUNKS_PATH, encoding="utf-8") as f:
         return [Chunk(**c) for c in json.load(f)]
+
+
+def chunks_by_id() -> dict[str, Chunk]:
+    return {c.id: c for c in ingest()}
+
+
+def get_article(num: str) -> list[Chunk]:
+    """Tous les chunks d'un article, dans l'ordre : get_article("L.115") -> [L.115-1, L.115-2, ...]."""
+    return [c for c in ingest() if article_of(c.id) == num]
+
+
+def list_sources(chunks: list[Chunk] | None = None) -> list[str]:
+    """Liste des sources citables (une par article), dans l'ordre du code.
+
+    Avec une liste de chunks (ex. les passages d'une réponse), ne renvoie que leurs sources.
+    """
+    chunks = ingest() if chunks is None else chunks
+    return list(dict.fromkeys(c.source for c in chunks))
+
+
+def document_reference() -> str:
+    d = SOURCE_DOC
+    return f"{d['titre']}, {d['editeur']}. {d['url']} (copie : {d['url_miroir']})"
+
+
+if __name__ == "__main__":
+    # démo : python -m src.ingestion.ingest L.135   |   python -m src.ingestion.ingest --sources
+    import sys
+
+    arg = sys.argv[1] if len(sys.argv) > 1 else ""
+    if arg == "--sources":
+        print(document_reference(), *list_sources(), sep="\n")
+    elif arg:
+        found = get_article(arg)
+        if not found:
+            print(f"Article {arg} introuvable.")
+        for c in found:
+            print(f"--- {c.id} ({c.source})\n{c.text}\n")
+    else:
+        chunks = ingest()
+        print(f"{len(chunks)} chunks, {len(list_sources(chunks))} articles. Source : {document_reference()}")
